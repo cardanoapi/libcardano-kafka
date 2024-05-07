@@ -1,0 +1,19 @@
+{
+    "name": "libcardano-kafka",
+    "version": "0.0.1",
+    "description": "",
+    "main": "src/index.js",
+    "author": "Reeshav Acharya",
+    "license": "ISC",
+    "dependencies": {
+      "fs": "^0.0.1-security",
+      "kafka": "^0.2.3",
+      "kafka-node": "^5.0.0",
+      "kafkajs": "^2.2.4"
+    },
+    "devDependencies": {
+      "@types/node": "^20.2.3",
+      "ts-node": "^10.9.2",
+      "typescript": "^5.0.4"
+    }
+  }
