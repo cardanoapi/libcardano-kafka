@@ -1,19 +1,26 @@
 {
-    "name": "libcardano-kafka",
-    "version": "0.0.1",
-    "description": "",
-    "main": "src/index.js",
-    "author": "Reeshav Acharya",
-    "license": "ISC",
-    "dependencies": {
-      "fs": "^0.0.1-security",
-      "kafka": "^0.2.3",
-      "kafka-node": "^5.0.0",
-      "kafkajs": "^2.2.4"
-    },
-    "devDependencies": {
-      "@types/node": "^20.2.3",
-      "ts-node": "^10.9.2",
-      "typescript": "^5.0.4"
-    }
+  "name": "libcardano-kafka",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.ts",
+  "author": "Reeshav Acharya",
+  "license": "ISC",
+  "dependencies": {
+    "cbor": "^9.0.2",
+    "fs": "^0.0.1-security",
+    "kafka": "^0.2.3",
+    "kafka-node": "^5.0.0",
+    "kafkajs": "^2.2.4",
+    "libcardano": "^0.0.6"
+  },
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "nodeToKafka": "ts-node src/sendMessages.ts",
+    "consume": "ts-node src/receiveMessages.ts" 
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.4"
   }
+}
