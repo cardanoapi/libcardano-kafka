@@ -16,7 +16,8 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "nodeToKafka": "ts-node src/sendMessages.ts",
-    "consume": "ts-node src/receiveMessages.ts" 
+    "consume": "ts-node src/receiveMessages.ts",
+    "build": "node scripts/build.js"
   },
   "devDependencies": {
     "@types/node": "^20.2.3",

@@ -1,5 +1,5 @@
 import { createInMemoryClientWithPeer } from "libcardano/src/helper"
-import { Kafka } from "./kafka"
+import { Kafka } from "../kafka"
 import { ChainTip } from "libcardano/src/types"
 
 const k = new Kafka(["kafka.sireto.dev:9092"], 'blockchain')
