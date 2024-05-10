@@ -8,37 +8,37 @@ import { consumers } from "stream";
 
 export class Kafka {
     client: KafkaClient
+    topic: string
     producer: Producer
+    consumer: Consumer
     receivedMessages: any[] = []
     blockchain: InmemoryBlockchain = new InmemoryBlockchain()
     rollBackPoint: ChainTip = [[0, Buffer.from('0')], 0]
-    constructor(hosts: string[]) {
+    constructor(hosts: string[], topic: string) {
         this.client = new KafkaClient({
             kafkaHost: hosts.join(','),
             maxAsyncRequests: 50
         })
+        this.topic = topic
         this.producer = new Producer(this.client, { requireAcks: 1 })
+        this.consumer = new Consumer (this.client, [{ topic: this.topic, partition: 0, offset: 0 }], { fromOffset: true, encoding: 'buffer', keyEncoding: 'buffer' })
     }
     sendKafkaMessage(topic: string, message: Buffer | { key: Buffer, message: Buffer }, cb?: (err?: any) => void) {
         this.producer.send([{ topic, messages: message instanceof Buffer ? message : new KeyedMessage(message.key, message.message) }], function (err, data) {
             if (err) { console.error('Error producing message:', err) }
-            else { console.log("Messaage Sent") }
             if (cb) { cb(err) }
         })
     }
-    async receiveKafkaMessage(topic: string, cb?: (err?: any, message?: any) => void) {
-        const consumer = new Consumer(this.client, [{ topic: topic, partition: 0, offset: 0 }], { fromOffset: true })
-        consumer.on('message', (message) => {
+    async receiveKafkaMessage(cb?: (err?: any, message?: any) => void) {
+        this.consumer.on('message', (message) => {
             this.receivedMessages.push(message)
-            console.log(message)
+            console.log(message) 
             if (cb) { cb(undefined, message) }
         })
     }
-    async getBlockInfo(topic: string) {
+    async getBlockInfo() {
         return new Promise((resolve, reject) => {
-            const kafkaData = new Consumer(this.client, [{ topic: topic, partition: 0, offset: 0 }], { fromOffset: true, encoding: 'buffer', keyEncoding: 'buffer' })
-            kafkaData.on('message', (message) => {
-                const key = (message.key instanceof Buffer) ? cbor.decode(message.key) : null;
+            this.consumer.on('message', (message) => {
                 if (message.value instanceof Buffer) {
                     const chainPoint = cbor.decode(message.value)
                     console.log("blockNo:", chainPoint.get('blockNo'), "\thash:", chainPoint.get('headerHash').toString('hex'), "\tslotNo:", chainPoint.get('slotNo'))
@@ -63,15 +63,14 @@ export class Kafka {
     }
     async getLatestTip(topic: string, key: string): Promise<ChainTip> {
         return new Promise((resolve, reject) => {
-            const kafkaData = new Consumer(this.client, [{ topic: topic, partition: 0, offset: 0 }], { fromOffset: true, encoding: 'buffer', keyEncoding: 'buffer' })
-            kafkaData.on('message', (message) => {
+            this.consumer.on('message', (message) => {
                 const key = (message.key instanceof Buffer) ? cbor.decode(message.key) : null;
                 if (message.value instanceof Buffer && key === key) {
                     const chainPoint = cbor.decode(message.value);
                     this.rollBackPoint = [[chainPoint.get('slotNo'), chainPoint.get('headerHash')], chainPoint.get('blockNo')];
                     if (message.offset === (message.highWaterOffset ? message.highWaterOffset - 1 : null)) {
                         console.log("latest")
-                        kafkaData.close(true, (err) => {
+                        this.consumer.close(true, (err) => {
                             if (err) {
                                 reject(err);
                             } else {
