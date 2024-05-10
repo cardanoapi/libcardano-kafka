@@ -11,6 +11,7 @@ function postBuild(){
     delete packageJson.prepublish
     delete packageJson.scripts
     packageJson.main="index.js"
+    packageJson.types= "index.d.ts"
     // show only typescript as dev dependency
     if(packageJson.devDependencies && packageJson.devDependencies.typescript ){
         packageJson.devDependencies={typescript:packageJson.devDependencies.typescript}

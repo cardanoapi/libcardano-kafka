@@ -15,8 +15,8 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "nodeToKafka": "ts-node src/sendMessages.ts",
-    "consume": "ts-node src/receiveMessages.ts",
+    "nodeToKafka": "ts-node src/examples/sendMessages.ts",
+    "consume": "ts-node src/examples/receiveMessages.ts",
     "build": "node scripts/build.js"
   },
   "devDependencies": {

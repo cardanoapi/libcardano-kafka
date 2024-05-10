@@ -1,9 +1,9 @@
 ## LibCardano Kafka
 
 **EXAMPLE USAGE**
-
+create kafka instance with hosts and topic
 ```ts
-const k = new Kafka(["kafka.sireto.dev:9092"])
+const k = new Kafka(["172.31.0.6:3004:9092"], 'blockchain')
 ```
 connect to node
 ```ts
@@ -15,17 +15,17 @@ send blocks as rollBack or rollForward
 blockchain.pipeline("extendBlock", (block, cb) => {
     setImmediate(cb)
     const chainTip: ChainTip = [[block.slotNo, block.headerHash], block.blockNo]
-    k.rollBack('blockchain', chainTip)
-    k.rollForward('blockchain', chainTip)
+    k.rollBack(chainTip)
+    k.rollForward(chainTip)
 })
 ```
 to see the sent messages: 
 ```ts
-k.receiveKafkaMessage('blockchain');
+k.receiveKafkaMessage();
 ```
 to see the blockchain info: 
 ```ts
-k.getBlockInfo('blockchain')
+k.getBlockInfo()
 ```
 to use inMemoryBlockchain's rollBack function
 ```ts

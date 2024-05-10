@@ -21,10 +21,10 @@ export class Kafka {
         })
         this.topic = topic
         this.producer = new Producer(this.client, { requireAcks: 1 })
-        this.consumer = new Consumer (this.client, [{ topic: this.topic, partition: 0, offset: 0 }], { fromOffset: true, encoding: 'buffer', keyEncoding: 'buffer' })
+        this.consumer = new Consumer(this.client, [{ topic: this.topic, partition: 0, offset: 0 }], { fromOffset: true, encoding: 'buffer', keyEncoding: 'buffer' })
     }
-    sendKafkaMessage(topic: string, message: Buffer | { key: Buffer, message: Buffer }, cb?: (err?: any) => void) {
-        this.producer.send([{ topic, messages: message instanceof Buffer ? message : new KeyedMessage(message.key, message.message) }], function (err, data) {
+    sendKafkaMessage(message: Buffer | { key: Buffer, message: Buffer }, topic?: string, cb?: (err?: any) => void) {
+        this.producer.send([{ topic: topic ? topic : this.topic, messages: message instanceof Buffer ? message : new KeyedMessage(message.key, message.message) }], function (err, data) {
             if (err) { console.error('Error producing message:', err) }
             if (cb) { cb(err) }
         })
@@ -32,7 +32,7 @@ export class Kafka {
     async receiveKafkaMessage(cb?: (err?: any, message?: any) => void) {
         this.consumer.on('message', (message) => {
             this.receivedMessages.push(message)
-            console.log(message) 
+            console.log(message)
             if (cb) { cb(undefined, message) }
         })
     }
@@ -46,19 +46,19 @@ export class Kafka {
             })
         })
     }
-    async rollForward(topic: string, tip: ChainTip) {
+    async rollForward(tip: ChainTip, topic?: string) {
         const eventData = cbor.encode({ blockNo: tip[1], slotNo: tip[0][0], headerHash: tip[0][1] })
         const rollForwardData = { key: cbor.encode("rollForward"), message: eventData }
-        this.sendKafkaMessage(topic, rollForwardData)
+        this.sendKafkaMessage(rollForwardData, topic)
     }
-    async rollBack(topic: string, tip: ChainTip) {
+    async rollBack(tip: ChainTip, topic?: string,) {
         const eventData = cbor.encode({ blockNo: tip[1], slotNo: tip[0][0], headerHash: tip[0][1] })
         const rollBackData = { key: cbor.encode("rollBack"), message: eventData }
-        this.sendKafkaMessage(topic, rollBackData)
+        this.sendKafkaMessage(rollBackData, topic)
     }
-    async writeBlockchain(topic: string, cb: (err?: any) => void): Promise<Boolean> {
-        const latestRollBack = await this.getLatestTip(topic, 'rollForward')
-        const latestTip = await this.getLatestTip(topic, 'rollBack')
+    async writeBlockchain(cb: (err?: any) => void, topic?: string ): Promise<Boolean> {
+        const latestRollBack = await this.getLatestTip(topic? topic : this.topic, 'rollForward')
+        const latestTip = await this.getLatestTip(topic? topic : this.topic, 'rollBack')
         return this.blockchain.rollBack(latestRollBack[0], latestTip[0], cb)
     }
     async getLatestTip(topic: string, key: string): Promise<ChainTip> {

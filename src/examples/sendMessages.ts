@@ -7,6 +7,6 @@ const blockchain = createInMemoryClientWithPeer("sanchonet-node.play.dev.cardano
 blockchain.pipeline("extendBlock", (block, cb) => {
     setImmediate(cb)
     const chainTip: ChainTip = [[block.slotNo, block.headerHash], block.blockNo]
-    // k.rollBack('blockchain', chainTip)
-    k.rollForward('blockchain', chainTip)
+    k.rollBack(chainTip)
+    k.rollForward(chainTip)
 })

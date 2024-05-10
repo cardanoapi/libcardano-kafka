@@ -4,15 +4,15 @@ import cbor, { encodeOne } from "cbor";
 
 export function install_kafka_subscriber(kafka: Kafka, blockchain: Blockchain) {
     blockchain.pipeline("extendBlock", (event, cb) => {
-        kafka.sendKafkaMessage('sancho_block', {
+        kafka.sendKafkaMessage({
             key: Buffer.from(''),
             message: encodeOne(event.body)
-        }, cb)
+        }, 'sancho_block', cb)
     })
     blockchain.pipeline("rollback", (from, to, cb) => {
-        kafka.sendKafkaMessage('sancho_block', {
+        kafka.sendKafkaMessage({
             key: encodeOne([0, from, to]),
             message: Buffer.from('')
-        }, cb)
+        }, 'sancho_block', cb)
     })
 }
